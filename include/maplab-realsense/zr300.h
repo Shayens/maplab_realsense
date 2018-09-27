@@ -69,6 +69,7 @@ class ZR300 {
   image_transport::CameraPublisher infrared_publisher_;
   image_transport::CameraPublisher infrared_2_publisher_;
   image_transport::CameraPublisher depth_publisher_;
+  ros::Publisher depth_aligned_publisher_;
   ros::Publisher imu_publisher_;
   ros::Publisher pointcloud_publisher_;
 
@@ -85,6 +86,9 @@ class ZR300 {
   rs::extrinsics T_color_infrared_;
   sensor_msgs::CameraInfo color_camera_info_;
   rs::intrinsics intrinsics_color_;
+  //New added
+  rs::intrinsics intrinsics_fisheye_;
+  rs::extrinsics T_fisheye_infrared_;
 
   tf2_ros::StaticTransformBroadcaster extrinsics_broadcaster_;
 

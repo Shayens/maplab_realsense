@@ -20,7 +20,7 @@ const std::string ZR300Config::kColorTopic = "color";
 const std::string ZR300Config::kImuTopic = "imu";
 const std::string ZR300Config::kInfraredTopic = "ir_1";
 const std::string ZR300Config::kInfrared2Topic = "ir_2";
-const std::string ZR300Config::kDepthTopic = "depth";
+const std::string ZR300Config::kDepthTopic = "depth_aligned";
 const std::string ZR300Config::kPointCloudTopic = "pointcloud";
 const std::string ZR300Config::kImageSuffix = "image_raw";
 

@@ -94,6 +94,7 @@ void ZR300::initializePublishers(ros::NodeHandle* nh) {
   }
   if (config_.depth_enabled) {
     depth_publisher_ = advertiseCamera(config_.kDepthTopic, config_.kImageSuffix);
+    //depth_aligned_publisher_ = nh->advertise<sensor_msgs::Image>("depth_aligned/image_raw", 1);
   }
 
   if (config_.imu_enabled) {
@@ -262,11 +263,15 @@ void ZR300::retrieveCameraCalibrations() {
   if (config_.color_enabled || config_.pointcloud_enabled) {
     getExtrinsics(rs::stream::color, zr300_device_, &T_infrared_color_);
     getIntrinsics(rs::stream::color, zr300_device_, &intrinsics_color_);
-
     invertExtrinsics(T_infrared_color_, &T_color_infrared_);
 
     convertCalibrationToCameraInfoMsg(
         intrinsics_color_, T_infrared_color_, &color_camera_info_);
+//New added
+	getIntrinsics(rs::stream::fisheye, zr300_device_, &intrinsics_fisheye_);
+	invertExtrinsics(T_infrared_fisheye_, &T_fisheye_infrared_);
+	convertCalibrationToCameraInfoMsg(
+			intrinsics_fisheye_, T_infrared_fisheye_, &fisheye_camera_info_);
   }
 
   try {
@@ -568,6 +573,7 @@ void ZR300::frameCallback(const rs::frame& frame) {
       msg->step = msg->width * 3;
       msg->encoding = sensor_msgs::image_encodings::RGB8;
       const size_t size = msg->height * msg->step;
+      //std::cout<<"yeee__________"<<msg->height <<"  "<<msg->step<<std::endl;
       msg->data.resize(size);
       memcpy(msg->data.data(), frame.get_data(), size);
 
@@ -677,15 +683,56 @@ void ZR300::frameCallback(const rs::frame& frame) {
       msg->encoding = sensor_msgs::image_encodings::TYPE_16UC1;
       const size_t size = msg->height * msg->step;
       msg->data.resize(size);
-      memcpy(msg->data.data(), frame.get_data(), size);
+//      memcpy(msg->data.data(), frame.get_data(), size);
 
       // Compose camera info msg.
       sensor_msgs::CameraInfoPtr camera_info_msg =
           boost::make_shared<sensor_msgs::CameraInfo>(depth_camera_info_);
       camera_info_msg->header = msg->header;
 
-      // Publish image.
-      depth_publisher_.publish(msg, camera_info_msg);
+//      // Publish image.
+//      depth_publisher_.publish(msg, camera_info_msg);
+//
+//      // Publish color_aligned depth image.
+//      msg->data.clear();
+//      msg->data.resize(size);
+
+        const float depth_scale = zr300_device_->get_depth_scale();
+	    for (size_t y_pixels = 0; y_pixels < latest_depth_map_.rows; ++y_pixels) {
+		    for (size_t x_pixels = 0; x_pixels < latest_depth_map_.cols; ++x_pixels) {
+			    rs::float2 depth_coord;
+			    depth_coord.x = x_pixels;
+			    depth_coord.y = y_pixels;
+
+			    const size_t depth_idx = x_pixels + latest_depth_map_.cols * y_pixels;
+
+			    const float z = reinterpret_cast<uint16_t*>(latest_depth_map_.data)[depth_idx] * depth_scale;
+
+			    if (z > 0.0) {
+				    const rs::float3 point = intrinsics_depth_.deproject(depth_coord, z);
+
+					rs::float3 point_under_coler_coord = T_color_infrared_.transform(T_infrared_depth_.transform(point));
+				    rs::float2 image_coord = intrinsics_color_.project(point_under_coler_coord);
+////                        using follow 2 lines to switch to fisheye
+//				    rs::float3 point_under_fisheye_coord = T_fisheye_infrared_.transform(T_infrared_depth_.transform(point));
+//				    rs::float2 image_coord = intrinsics_fisheye_.project(point_under_fisheye_coord);
+				    image_coord.x = std::round(image_coord.x);
+				    image_coord.y = std::round(image_coord.y);
+				    if ((image_coord.x < latest_color_image_.cols) && (image_coord.x >= 0) &&
+				        (image_coord.y < latest_color_image_.rows) && (image_coord.y >= 0)) {
+					    const size_t color_image_idx =
+							    2*(image_coord.x + latest_color_image_.cols * image_coord.y);
+                        msg->data[color_image_idx] = uint16_t(point_under_coler_coord.z / depth_scale)>>8;
+                        msg->data[color_image_idx+1] = uint16_t(point_under_coler_coord.z / depth_scale) & 0x00ff;
+////                        using follow 2 lines to switch to fisheye
+//                        msg->data[color_image_idx] = uint16_t(point_under_fisheye_coord.z / depth_scale)>>8;
+//                        msg->data[color_image_idx+1] = uint16_t(point_under_fisheye_coord.z / depth_scale) & 0x00ff;
+                    }
+                }
+            }
+        }
+        depth_publisher_.publish(msg, camera_info_msg);
+//      depth_aligned_publisher_.publish(msg);
 
       if (config_.pointcloud_enabled) {
         publishPointCloudIfDataAvailable();
