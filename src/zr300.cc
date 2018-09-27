@@ -720,10 +720,9 @@ void ZR300::frameCallback(const rs::frame& frame) {
 				    image_coord.y = std::round(image_coord.y);
 				    if ((image_coord.x < latest_color_image_.cols) && (image_coord.x >= 0) &&
 				        (image_coord.y < latest_color_image_.rows) && (image_coord.y >= 0)) {
-					    const size_t color_image_idx =
-							    2*(image_coord.x + latest_color_image_.cols * image_coord.y);
-                        msg->data[color_image_idx] = uint16_t(point_under_coler_coord.z / depth_scale)>>8;
-                        msg->data[color_image_idx+1] = uint16_t(point_under_coler_coord.z / depth_scale) & 0x00ff;
+					    const size_t color_image_idx = 2*(image_coord.x + latest_color_image_.cols * image_coord.y);
+                        msg->data[color_image_idx+1] = uint16_t(point_under_coler_coord.z / depth_scale)>>8;
+                        msg->data[color_image_idx] = uint16_t(point_under_coler_coord.z / depth_scale) & 0x00ff;
 ////                        using follow 2 lines to switch to fisheye
 //                        msg->data[color_image_idx] = uint16_t(point_under_fisheye_coord.z / depth_scale)>>8;
 //                        msg->data[color_image_idx+1] = uint16_t(point_under_fisheye_coord.z / depth_scale) & 0x00ff;
