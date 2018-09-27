@@ -25,15 +25,15 @@ https://click.intel.com/media/ZR300-Product-Datasheet-Public-002.pdf -->
     <param name="color/fps" value="30"/>
     <param name="color/subsample_factor" value="1"/>
 
-    <param name="depth/enabled" value="false"/>
+    <param name="depth/enabled" value="true"/>
     <param name="depth/width" value="640"/>
     <param name="depth/height" value="480"/>
     <param name="depth/fps" value="30"/>
     <param name="depth/subsample_factor" value="1"/>
-    <param name="depth/median_filter_enabled" value="false"/>
+    <param name="depth/median_filter_enabled" value="true"/>
     <!-- Only 3 or 5 are supported by opencv for this image type. -->
     <param name="depth/median_filter_size" value="5"/>
-    <param name="depth/min_max_filter_enabled" value="false"/>
+    <param name="depth/min_max_filter_enabled" value="true"/>
     <param name="depth/min_max_filter_size" value="3"/>
     <param name="depth/min_max_filter_threshold" value="0.1"/>
 
@@ -46,7 +46,7 @@ https://click.intel.com/media/ZR300-Product-Datasheet-Public-002.pdf -->
     <param name="infrared/gain" value="1"/>
     <param name="infrared/exposure" value="5"/>
 
-    <param name="pointcloud/enabled" value="false"/>
+    <param name="pointcloud/enabled" value="true"/>
   </node>
 
   <!-- Disable compression for depth -->
