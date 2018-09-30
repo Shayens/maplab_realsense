@@ -10,7 +10,7 @@ https://click.intel.com/media/ZR300-Product-Datasheet-Public-002.pdf -->
     <param name="imu/enabled" value="true"/>
     <param name="imu/imu_skip_first_n_gyro_measurements" value="100"/>
 
-    <param name="fisheye/enabled" value="true"/>
+    <param name="fisheye/enabled" value="false"/>
     <param name="fisheye/width" value="640"/>
     <param name="fisheye/height" value="480"/>
     <param name="fisheye/fps" value="30"/>
@@ -39,14 +39,14 @@ https://click.intel.com/media/ZR300-Product-Datasheet-Public-002.pdf -->
 
     <param name="infrared/enabled" value="true"/>
     <param name="infrared/subsample_factor" value="1"/>
-    <param name="infrared/enable_auto_exposure" value="true"/>
+    <param name="infrared/enable_auto_exposure" value="false"/>
     <param name="infrared/emitter_enabled" value="true"/>
     <!-- Values for outdoor calibration, disable autoexposure
          for these settings to take effect. -->
-    <param name="infrared/gain" value="1"/>
-    <param name="infrared/exposure" value="5"/>
+    <param name="infrared/gain" value="100"/>
+    <param name="infrared/exposure" value="164"/>
 
-    <param name="pointcloud/enabled" value="true"/>
+    <param name="pointcloud/enabled" value="false"/>
   </node>
 
   <!-- Disable compression for depth -->
