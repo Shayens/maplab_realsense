@@ -14,6 +14,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <cv_bridge/cv_bridge.h>
 
 namespace maplab_realsense {
 
@@ -753,19 +754,22 @@ void ZR300::frameCallback(const rs::frame& frame) {
       sensor_msgs::ImagePtr msg = boost::make_shared<sensor_msgs::Image>();
 
       CHECK(device_time_translator_->isReadyToTranslate());
-      msg->header.stamp = device_time_translator_->translate(
-          sensor_timestamp_s * kMillisecondsToNanoseconds);
 
-      msg->header.frame_id = "depth";
+      cv_bridge::CvImage  out_msg;
+      out_msg.header.stamp = device_time_translator_->translate(sensor_timestamp_s * kMillisecondsToNanoseconds);
+      out_msg.header.frame_id = "depth";
+      out_msg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
+      out_msg.image = latest_depth_map_;
 
-      msg->height = frame.get_height();
-      msg->width = frame.get_width();
-      msg->step = msg->width * 2;
-      msg->encoding = sensor_msgs::image_encodings::TYPE_16UC1;
-      const size_t size = msg->height * msg->step;
-      msg->data.resize(size);
-      memcpy(msg->data.data(), frame.get_data(), size);
+//      msg->height = frame.get_height();
+//      msg->width = frame.get_width();
+//      msg->step = msg->width * 2;
+//      msg->encoding = sensor_msgs::image_encodings::TYPE_16UC1;
+//      const size_t size = msg->height * msg->step;
+//      msg->data.resize(size);
+//      memcpy(msg->data.data(), frame.get_data(), size);
 
+      msg = out_msg.toImageMsg();
       // Compose camera info msg.
       sensor_msgs::CameraInfoPtr camera_info_msg =
           boost::make_shared<sensor_msgs::CameraInfo>(depth_camera_info_);
